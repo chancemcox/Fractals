@@ -1,0 +1,118 @@
+<html>
+
+<body>
+  <canvas id="myCanvas"></canvas>
+  <script>
+    var canvas = document.getElementById('myCanvas');
+    var context = canvas.getContext('2d');
+    canvas.addEventListener("mousedown", zoom, false);
+    var sizex = 1600;
+    var sizey = 1000;
+    var scale = 500;
+    var ymin = -1
+    var xmin = -2
+
+    var name = "Oliver Cox";
+    name = name.replace(/\s+/g, '');
+    var nameArray = [];
+    var max = 0;
+
+    for (var i = 0; i < name.length; i++) {
+      nameArray[i] = name.charCodeAt(i);
+      if (nameArray[i] > max) max = nameArray[i];
+    }
+
+    function getNameVal(x) {
+      // return x;
+      x = x % nameArray.length;
+      return nameArray[x];
+    }
+
+    function getZVal(x) {
+      // /max
+      return 0;
+    }
+
+    function zoom(event) {
+      xmin = xmin + (Math.floor(event.pageX / 4) / scale);
+      ymin = -(Math.floor(event.pageY / 4) / scale) + (200 / scale) + ymin;
+      scale = scale * 1.2;
+      mandel();
+    }
+
+
+
+    canvas.height = sizey;
+    canvas.width = sizex;
+    var pallette = []; // the array that will hold the hex strings of the colors
+
+    for (x = 0; x < 256; x++) // the loop that creates the pallette
+    {
+      if (x < 85) // colors 0-84
+      {
+        r = x * 3;
+        g = x;
+        b = x;
+      }
+      if (x > 84 && x < 171) // colors 85-170
+      {
+        r = (x - 84);
+        g = 3 * (x - 84);
+        b = (x - 84);
+      }
+      if (x > 170) // colors 170-255
+      {
+        r = (x - 170);
+        g = (x - 170);
+        // b= 0;
+        b = 3 * (x - 170);
+      }
+      if (x == 255) {
+        r = 0;
+        g = 0;
+        b = 0;
+      }
+      // if (x == 0) b = 255
+      r = r.toString(16); // conversion to hex
+      g = g.toString(16);
+      b = b.toString(16);
+
+      if (r.length == 1) r = "0" + r; // add a zero in front to change single-digit to double digit
+      if (g.length == 1) g = "0" + g;
+      if (b.length == 1) b = "0" + b;
+
+
+      pallette[x] = "#" + r + g + b; // final hex string
+    }
+
+    function mandel() {
+      for (x = 0; x < sizex; x++) {
+        for (y = 0; y < sizey; y++) {
+          i = 0;
+          cx = xmin + x / scale;
+          cy = ymin + y / scale;
+          zx = getZVal(x);
+          zy = getZVal(y);
+
+          do {
+            xt = zx * zy;
+            zx = zx * zx - zy * zy + cx;
+            zy = 2 * xt + cy;
+            i++;
+          }
+          while (i < 255 && (zx * zx + zy * zy) < 4);
+
+          // color=i.toString(16);
+          context.beginPath();
+          context.rect(x, y, 1, 1);
+          context.fillStyle = pallette[getNameVal(i)];
+          // context.fillStyle ='#'+color+color+color;
+          context.fill();
+        }
+      }
+    }
+    mandel()
+  </script>
+</body>
+
+</html>
